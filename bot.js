@@ -4,6 +4,9 @@ var auth = require('./auth.json');
 var fs = require('fs');
 var scheduler = require('node-schedule');
 
+var admin_roleid = '773310868443758592';
+var trusted_roleid = '775937232980148286';
+
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', reason.stack || reason)
 });
@@ -43,7 +46,7 @@ bot.on('message', msg => {
 
           // !config <shortcut> <role>
           case 'config':
-            if(msg.member.roles.cache.has('773310868443758592')) {
+            if(msg.member.roles.cache.has(admin_roleid)) {
               if(msg.mentions.roles.first() == undefined || cmd2 == msg.mentions.roles.first().toString()) {
                 msg.channel.send('Syntax: !config <shortcut> <@role>');
               } else {
@@ -68,7 +71,7 @@ bot.on('message', msg => {
 
           // !delete <shortcut>
           case 'delete':
-            if(msg.member.roles.cache.has('773310868443758592')) {
+            if(msg.member.roles.cache.has(admin_roleid)) {
               fs.readFile(__dirname + '/shortcuts.json', 'utf8', (err, data) => {
                 var commandsObj = JSON.parse(data);
                 if(Object.keys(commandsObj).includes(cmd2)) {
@@ -87,7 +90,7 @@ bot.on('message', msg => {
           break;
 
           case 'list':
-            if(msg.member.roles.cache.has('773310868443758592') || msg.member.roles.cache.has('775937232980148286')) {
+            if(msg.member.roles.cache.has(admin_roleid) || msg.member.roles.cache.has(trusted_roleid)) {
               fs.readFile(__dirname + '/shortcuts.json', 'utf8', (err, data) => {
                 var commandsObj = JSON.parse(data);
                 msg.channel.send('Available commands:\n'.concat(Object.keys(commandsObj)));
@@ -102,16 +105,16 @@ bot.on('message', msg => {
             fs.readFile(__dirname + '/shortcuts.json', 'utf8', (err, data) => {
               var commandsObj = JSON.parse(data);
               if(Object.keys(commandsObj).includes(cmd)) {
-                if(msg.member.roles.cache.has('773310868443758592') || msg.member.roles.cache.has('775937232980148286')) {
+                if(msg.member.roles.cache.has(admin_roleid) || msg.member.roles.cache.has(trusted_roleid)) {
                   if(msg.mentions.users.first() == undefined) {
                     msg.channel.send('You did not mention a user!');
                   } else {
                     if(msg.mentions.members.first().roles.cache.has(commandsObj[cmd].roleId)) {
                       msg.mentions.members.first().roles.remove(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
-                      msg.channel.send('Role '.concat(cmd, ' removed from user ', msg.mentions.members.first().nickname));
+                      msg.channel.send('Role '.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, ' removed from user ', msg.mentions.members.first().nickname));
                     } else {
                       msg.mentions.members.first().roles.add(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
-                      msg.channel.send('Role '.concat(cmd, ' assigned to user ', msg.mentions.members.first().nickname));
+                      msg.channel.send('Role '.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, ' assigned to user ', msg.mentions.members.first().nickname));
                     }
                   }
                 } else {
