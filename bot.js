@@ -47,16 +47,23 @@ bot.on('message', msg => {
           // !config <shortcut> <role>
           case 'config':
             if(msg.member.roles.cache.has(admin_roleid)) {
-              if(msg.mentions.roles.first() == undefined || cmd2 == msg.mentions.roles.first().toString()) {
-                msg.channel.send('Syntax: !config <shortcut> <@role>');
+              var id_re = new RegExp("[0-9]{18}");
+              if((msg.mentions.roles.first() == undefined && !id_re.exec(args[2]))) {
+                msg.channel.send('Syntax: !config <shortcut> <@role> or !config <shortcut> <role id>');
+              } else if(msg.mentions.roles.first() != undefined && cmd2 == msg.mentions.roles.first().toString()) {
+                msg.channel.send('Syntax: !config <shortcut> <@role> or !config <shortcut> <role id>');
               } else {
-                var role = msg.mentions.roles.first();
+                if(msg.mentions.roles.first() == undefined) {
+                  var roleId = args[2];
+                } else {
+                  var roleId = msg.mentions.roles.first().id;
+                }
                 fs.readFile(__dirname + '/shortcuts.json', 'utf8', (err, data) => {
                   var commandsObj = JSON.parse(data);
                   if(Object.keys(commandsObj).includes(cmd2)) {
                     msg.channel.send('The command exists already, use !delete <shortcut> to delete it.');
                   } else {
-                    commandsObj[cmd2] = {roleId: role.id}
+                    commandsObj[cmd2] = {roleId: roleId}
                     fs.writeFile(__dirname + '/shortcuts.json', JSON.stringify(commandsObj, null, 2), 'utf8', (err) => {
                       if (err) throw err;
                       msg.channel.send('The command has been created.');
@@ -113,8 +120,12 @@ bot.on('message', msg => {
                       msg.mentions.members.first().roles.remove(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
                       msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\" removed from user ', msg.mentions.members.first().nickname));
                     } else {
-                      msg.mentions.members.first().roles.add(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
-                      msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\" assigned to user ', msg.mentions.members.first().nickname));
+                      if(msg.guild.roles.cache.get(commandsObj[cmd].roleId) == undefined) {
+                        msg.channel.send('ID of shortcut \"'.concat(cmd, '\" is incorrect, consider deleting and readding!'));
+                      } else {
+                        msg.mentions.members.first().roles.add(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
+                        msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\" assigned to user ', msg.mentions.members.first().nickname));
+                      }
                     }
                   }
                 } else {
