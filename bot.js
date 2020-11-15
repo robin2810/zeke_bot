@@ -111,10 +111,10 @@ bot.on('message', msg => {
                   } else {
                     if(msg.mentions.members.first().roles.cache.has(commandsObj[cmd].roleId)) {
                       msg.mentions.members.first().roles.remove(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
-                      msg.channel.send('Role '.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, ' removed from user ', msg.mentions.members.first().nickname));
+                      msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\" removed from user ', msg.mentions.members.first().nickname));
                     } else {
                       msg.mentions.members.first().roles.add(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
-                      msg.channel.send('Role '.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, ' assigned to user ', msg.mentions.members.first().nickname));
+                      msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\" assigned to user ', msg.mentions.members.first().nickname));
                     }
                   }
                 } else {
