@@ -4,7 +4,7 @@ var auth = require('./auth.json');
 var fs = require('fs');
 var scheduler = require('node-schedule');
 
-var admin_roleid = '694544219989082142';
+var admin_roleid = '773310868443758592';
 var trusted_roleid = '775937232980148286';
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
