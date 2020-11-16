@@ -4,11 +4,8 @@ var auth = require('./auth.json');
 var fs = require('fs');
 var scheduler = require('node-schedule');
 
-var admin_roleid = '694544219989082142';
+var admin_roleid = '773310868443758592';
 var trusted_roleid = '775937232980148286';
-
-const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"];
 
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', reason.stack || reason)
@@ -22,19 +19,13 @@ logger.add(new logger.transports.Console, {
 logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client();
-
-var today = new Date();
 bot.login(auth.token);
-logger.info('Bot logged in on '.concat(today.getUTCDate(), ' ', monthNames[today.getUTCMonth()], ' ', today.getUTCFullYear(), ' at ', getTime(today)));
 
 var jobConnectBot = scheduler.scheduleJob('*/30 * * * * *', () => {
-  if(bot.user == null) {
-    var today = new Date();
+  if(!bot.connected) {
     bot.login(auth.token);
-    logger.info('Bot logged in on '.concat(today.getUTCDate(), ' ', monthNames[today.getUTCMonth()], ' ', today.getUTCFullYear(), ' at ', getTime(today)));
   }
 });
-logger.info('Connect job scheduled');
 
 bot.on('ready', evt => {
     logger.info('Connected');
@@ -109,11 +100,7 @@ bot.on('message', msg => {
             if(msg.member.roles.cache.has(admin_roleid) || msg.member.roles.cache.has(trusted_roleid)) {
               fs.readFile(__dirname + '/shortcuts.json', 'utf8', (err, data) => {
                 var commandsObj = JSON.parse(data);
-                var list = '';
-                for (var command in commandsObj) {
-                  list = list.concat('!', command, ' -> ',msg.guild.roles.cache.get(commandsObj[command].roleId).name , '\n');
-                }
-                msg.channel.send('Available commands:\n'.concat(list));
+                msg.channel.send('Available commands:\n'.concat(Object.keys(commandsObj)));
               });
             } else {
               msg.channel.send('You are not permitted to use this command.');
@@ -152,15 +139,3 @@ bot.on('message', msg => {
        }
    }
 });
-
-function getTime(date) {
-  if(date.getUTCHours() == 0) {
-    return '12:' + (date.getUTCMinutes()).toString().padStart(2, '0') + 'am UTC';
-  } else if(date.getUTCHours() < 12) {
-    return date.getUTCHours() + ':' + (date.getUTCMinutes()).toString().padStart(2, '0') + 'am UTC';
-  } else if(date.getUTCHours() == 12) {
-    return '12:' + (date.getUTCMinutes()).toString().padStart(2, '0') + 'pm UTC';
-  } else {
-    return (date.getUTCHours()-12) + ':' + (date.getUTCMinutes()).toString().padStart(2, '0') + 'pm UTC';
-  }
-}
