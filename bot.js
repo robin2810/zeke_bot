@@ -144,7 +144,6 @@ bot.on('message', msg => {
                     var assigned = [];
                     var removed = [];
                     for (var member of msg.mentions.members) {
-                      console.log(member[1]);
                       if(member[1].roles.cache.has(commandsObj[cmd].roleId)) {
                         member[1].roles.remove(msg.guild.roles.cache.get(commandsObj[cmd].roleId));
                         if(member[1].nickname == null) {
@@ -165,9 +164,14 @@ bot.on('message', msg => {
                         }
                       }
                     }
-                    console.log(assigned);
-                    console.log(removed);
-                    msg.channel.send('Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\":\nassigned to user(s) ', assigned.join(', '), '\nremoved from user(s) ', removed.join(', ')));
+                    var messageToSend = 'Role \"'.concat(msg.guild.roles.cache.get(commandsObj[cmd].roleId).name, '\":');
+                    if(assigned.length > 0) {
+                      messageToSend = messageToSend.concat('\nassigned to user(s) ', assigned.join(', '));
+                    }
+                    if(removed.length > 0) {
+                      messageToSend = messageToSend.concat('\nremoved from user(s) ', removed.join(', '));
+                    }
+                    msg.channel.send(messageToSend);
                   }
                 } else {
                   msg.channel.send('You are not permitted to use this command.');
